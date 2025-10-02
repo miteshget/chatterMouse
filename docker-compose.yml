@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  chattermouse-chat:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=${PORT:-3000}
+      - JWT_SECRET=${JWT_SECRET}
+      - CHATTERM_API_URL=${CHATTERM_API_URL}
+      - CHATTERM_MODEL_NAME=${CHATTERM_MODEL_NAME}
+      - CHATTERM_API_TOKEN=${CHATTERM_API_TOKEN}
+      - CHATTERM_MAX_TOKENS=${CHATTERM_MAX_TOKENS}
+      - CHATTERM_TEMPERATURE=${CHATTERM_TEMPERATURE}
+      - CHATTERM_TIMEOUT=${CHATTERM_TIMEOUT}
+      - APP_TITLE=${APP_TITLE}
+      - APP_SUBTITLE=${APP_SUBTITLE}
+      - CHAT_ASSISTANT_NAME=${CHAT_ASSISTANT_NAME}
+      - CHAT_USER_NAME=${CHAT_USER_NAME}
+      - WELCOME_MESSAGE=${WELCOME_MESSAGE}
+      - INPUT_PLACEHOLDER=${INPUT_PLACEHOLDER}
+      - LOADING_MESSAGE=${LOADING_MESSAGE}
+      - SEND_BUTTON_TEXT=${SEND_BUTTON_TEXT}
+      - MAX_CONVERSATION_HISTORY=${MAX_CONVERSATION_HISTORY}
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - chattermouse-network
+
+networks:
+  chattermouse-network:
+    driver: bridge

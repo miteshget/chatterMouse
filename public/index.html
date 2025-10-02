@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">ChatterMouse Application</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: #343541;
+            color: #ececf1;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Authentication Styles */
+        .auth-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .auth-box {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            color: #333;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .auth-logo {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #10a37f, #1a7f64);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 18px;
+            color: white;
+        }
+
+        .auth-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .auth-subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s ease;
+            background: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #10a37f;
+        }
+
+        .auth-button {
+            width: 100%;
+            padding: 12px 16px;
+            background: #10a37f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-bottom: 16px;
+        }
+
+        .auth-button:hover {
+            background: #0d8f6b;
+        }
+
+        .auth-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .auth-toggle {
+            text-align: center;
+            color: #666;
+        }
+
+        .auth-toggle button {
+            background: none;
+            border: none;
+            color: #10a37f;
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 14px;
+        }
+
+        .error-message {
+            background: #f56565;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        /* Main Application Styles */
+        .sidebar {
+            width: 260px;
+            background-color: #202123;
+            border-right: 1px solid #4d4d4f;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            width: 0;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 18px;
+            border-bottom: 1px solid #4d4d4f;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #10a37f, #1a7f64);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .app-info h1 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ececf1;
+        }
+
+        .app-info p {
+            font-size: 12px;
+            color: #8e8ea0;
+            margin-top: 2px;
+        }
+
+        .sidebar-nav {
+            padding: 16px;
+            border-bottom: 1px solid #4d4d4f;
+        }
+
+        .nav-button {
+            width: 100%;
+            padding: 12px 16px;
+            background: transparent;
+            border: 1px solid #4d4d4f;
+            border-radius: 8px;
+            color: #ececf1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            margin-bottom: 8px;
+        }
+
+        .nav-button:hover {
+            background-color: #2a2b32;
+        }
+
+        .nav-button.active {
+            background-color: #343541;
+            border-color: #10a37f;
+        }
+
+        .chat-history {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 8px;
+        }
+
+        .chat-history-item {
+            padding: 12px 16px;
+            margin: 4px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #ececf1;
+            transition: background-color 0.2s ease;
+        }
+
+        .chat-history-item:hover {
+            background-color: #2a2b32;
+        }
+
+        .chat-history-item.active {
+            background-color: #343541;
+        }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid #4d4d4f;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #5436da;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: #ececf1;
+        }
+
+        .logout-button {
+            width: 100%;
+            padding: 8px 12px;
+            background: transparent;
+            border: 1px solid #4d4d4f;
+            border-radius: 6px;
+            color: #ececf1;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .logout-button:hover {
+            background-color: #2a2b32;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .main-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #4d4d4f;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toggle-sidebar {
+            background: none;
+            border: none;
+            color: #ececf1;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+        }
+
+        .toggle-sidebar:hover {
+            background-color: #2a2b32;
+        }
+
+        .model-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #8e8ea0;
+            font-size: 14px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+            background-color: #343541;
+        }
+
+        .message-container {
+            padding: 24px 0;
+            border-bottom: 1px solid #4d4d4f;
+        }
+
+        .message-container:last-child {
+            border-bottom: none;
+        }
+
+        .message-container.user {
+            background-color: #343541;
+        }
+
+        .message-container.assistant {
+            background-color: #444654;
+        }
+
+        .message-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            gap: 16px;
+        }
+
+        .message-avatar {
+            min-width: 80px;
+            height: 30px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            flex-shrink: 0;
+            padding: 0 8px;
+            text-align: center;
+            word-break: break-word;
+        }
+
+        .message-avatar.user {
+            background: #5436da;
+            color: white;
+        }
+
+        .message-avatar.assistant {
+            background: #10a37f;
+            color: white;
+        }
+
+        .message-text {
+            flex: 1;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .chat-input-container {
+            padding: 24px;
+            background-color: #343541;
+        }
+
+        .chat-input-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .chat-input {
+            width: 100%;
+            padding: 16px 56px 16px 16px;
+            background-color: #40414f;
+            border: 1px solid #565869;
+            border-radius: 12px;
+            color: #ececf1;
+            font-size: 16px;
+            line-height: 1.5;
+            outline: none;
+            resize: none;
+            min-height: 56px;
+            max-height: 200px;
+            font-family: inherit;
+        }
+
+        .chat-input:focus {
+            border-color: #10a37f;
+            box-shadow: 0 0 0 2px rgba(16, 163, 127, 0.1);
+        }
+
+        .send-button {
+            position: absolute;
+            right: 12px;
+            bottom: 12px;
+            width: 32px;
+            height: 32px;
+            background: #10a37f;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .send-button:disabled {
+            background: #565869;
+            cursor: not-allowed;
+        }
+
+        .send-button:not(:disabled):hover {
+            background: #0d8f6b;
+        }
+
+        .loading {
+            display: none;
+            padding: 24px 0;
+            border-bottom: 1px solid #4d4d4f;
+            background-color: #444654;
+        }
+
+        .loading-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .loading-avatar {
+            min-width: 80px;
+            height: 30px;
+            border-radius: 4px;
+            background: #10a37f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+            padding: 0 8px;
+            text-align: center;
+            word-break: break-word;
+        }
+
+        .loading-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #8e8ea0;
+            animation: loading 1.4s infinite ease-in-out;
+        }
+
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes loading {
+            0%, 80%, 100% { opacity: 0.3; }
+            40% { opacity: 1; }
+        }
+
+        .welcome-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 24px;
+            text-align: center;
+        }
+
+        .welcome-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #10a37f, #1a7f64);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            font-size: 32px;
+            color: white;
+        }
+
+        .welcome-logo img {
+            width: 100%;
+            height: 100%;
+            border-radius: 16px;
+            object-fit: cover;
+        }
+
+        .welcome-title {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #ececf1;
+        }
+
+        .welcome-subtitle {
+            font-size: 16px;
+            color: #8e8ea0;
+            margin-bottom: 32px;
+            max-width: 600px;
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100%;
+            background: #202123;
+            border-left: 1px solid #4d4d4f;
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .settings-panel.open {
+            right: 0;
+        }
+
+        .settings-header {
+            padding: 24px;
+            border-bottom: 1px solid #4d4d4f;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .settings-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ececf1;
+        }
+
+        .close-settings {
+            background: none;
+            border: none;
+            color: #ececf1;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+        }
+
+        .close-settings:hover {
+            background-color: #2a2b32;
+        }
+
+        .settings-content {
+            padding: 24px;
+        }
+
+        .settings-section {
+            margin-bottom: 32px;
+        }
+
+        .settings-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ececf1;
+            margin-bottom: 16px;
+        }
+
+        .settings-field {
+            margin-bottom: 16px;
+        }
+
+        .settings-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #ececf1;
+            font-size: 14px;
+        }
+
+        .settings-input {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: #40414f;
+            border: 1px solid #565869;
+            border-radius: 8px;
+            color: #ececf1;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .settings-input:focus {
+            border-color: #10a37f;
+        }
+
+        .settings-input[type="password"] {
+            font-family: monospace;
+        }
+
+        .settings-range {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .settings-range input[type="range"] {
+            flex: 1;
+        }
+
+        .range-value {
+            min-width: 40px;
+            text-align: center;
+            font-size: 14px;
+            color: #8e8ea0;
+        }
+
+        .save-settings {
+            width: 100%;
+            padding: 12px 16px;
+            background: #10a37f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .save-settings:hover {
+            background: #0d8f6b;
+        }
+
+        .save-settings:disabled {
+            background: #565869;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: #f56565;
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 24px;
+            border-left: 4px solid #e53e3e;
+        }
+
+        .success-message {
+            background: #48bb78;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                left: 0;
+                top: 0;
+                height: 100%;
+                z-index: 1000;
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar.collapsed {
+                width: 260px;
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                width: 100%;
+            }
+
+            .settings-panel {
+                width: 100%;
+                right: -100%;
+            }
+
+            .message-content {
+                padding: 0 16px;
+            }
+
+            .chat-input-container {
+                padding: 16px;
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #565869;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6f7077;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Authentication Container -->
+    <div class="auth-container" id="authContainer">
+        <div class="auth-box">
+            <div class="auth-header">
+                <div class="auth-logo" id="authLogo">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h1 class="auth-title" id="authTitle">Welcome to ChatterMouse</h1>
+                <p class="auth-subtitle" id="authSubtitle">Sign in to continue</p>
+            </div>
+
+            <div id="authError" class="error-message hidden"></div>
+
+            <!-- Sign In Form -->
+            <form id="signinForm">
+                <div class="form-group">
+                    <label class="form-label" for="signinUsername">Username or Email</label>
+                    <input type="text" id="signinUsername" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="signinPassword">Password</label>
+                    <input type="password" id="signinPassword" class="form-input" required>
+                </div>
+                <button type="submit" class="auth-button" id="signinButton">Sign In</button>
+            </form>
+
+            <!-- Sign Up Form -->
+            <form id="signupForm" class="hidden">
+                <div class="form-group">
+                    <label class="form-label" for="signupUsername">Username</label>
+                    <input type="text" id="signupUsername" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="signupEmail">Email</label>
+                    <input type="email" id="signupEmail" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="signupPassword">Password</label>
+                    <input type="password" id="signupPassword" class="form-input" minlength="6" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="signupPasswordConfirm">Confirm Password</label>
+                    <input type="password" id="signupPasswordConfirm" class="form-input" minlength="6" required>
+                </div>
+                <button type="submit" class="auth-button" id="signupButton">Sign Up</button>
+            </form>
+
+            <!-- Forgot Password Form -->
+            <form id="forgotPasswordForm" class="hidden">
+                <div class="form-group">
+                    <label class="form-label" for="forgotUsernameOrEmail">Username or Email</label>
+                    <input type="text" id="forgotUsernameOrEmail" class="form-input" required>
+                </div>
+                <button type="submit" class="auth-button" id="resetPasswordButton">Reset Password</button>
+            </form>
+
+            <div class="auth-toggle">
+                <span id="authToggleText">Don't have an account?</span>
+                <button type="button" id="authToggleButton">Sign Up</button>
+            </div>
+
+            <div class="auth-toggle" id="forgotPasswordSection">
+                <button type="button" id="forgotPasswordButton">Forgot Password?</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo" id="appLogo">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="app-info">
+                <h1 id="appTitle">ChatterMouse</h1>
+                <p id="appSubtitle">AI Assistant</p>
+            </div>
+        </div>
+        
+        <div class="sidebar-nav">
+            <button class="nav-button active" id="newChatBtn">
+                <i class="fas fa-plus"></i>
+                <span>New Chat</span>
+            </button>
+            <button class="nav-button" id="settingsBtn">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </button>
+        </div>
+        
+        <div class="chat-history" id="chatHistory">
+            <!-- Chat history items will be populated here -->
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <div class="user-name" id="userName">User</div>
+            </div>
+            <button class="logout-button" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i> Sign Out
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="main-header">
+            <button class="toggle-sidebar" id="toggleSidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="model-info">
+                <i class="fas fa-brain"></i>
+                <span id="modelName">granite-3-2-8b-instruct</span>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="welcome-screen" id="welcomeScreen">
+                <div class="welcome-logo" id="welcomeLogo">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h1 class="welcome-title" id="welcomeTitle">Welcome to ChatterMouse</h1>
+                <p class="welcome-subtitle" id="welcomeSubtitle">Start a conversation with our AI assistant</p>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="loading-content">
+                <div class="loading-avatar" id="loadingAvatar">AI</div>
+                <div class="loading-dots">
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                </div>
+                <span id="loadingMessage">Thinking...</span>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="chat-input-wrapper">
+                <textarea 
+                    id="messageInput" 
+                    class="chat-input" 
+                    placeholder="Type your message here..." 
+                    rows="1"
+                ></textarea>
+                <button class="send-button" id="sendButton">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header">
+            <h2 class="settings-title">Settings</h2>
+            <button class="close-settings" id="closeSettings">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="settings-content">
+            <div id="settingsError" class="error-message hidden"></div>
+            <div id="settingsSuccess" class="success-message hidden"></div>
+
+            <form id="settingsForm">
+                <div class="settings-section">
+                    <h3 class="settings-section-title">Model Configuration</h3>
+                    
+                    <div class="settings-field">
+                        <label class="settings-label" for="settingsModelName">Model Name</label>
+                        <input type="text" id="settingsModelName" class="settings-input" placeholder="granite-3-2-8b-instruct">
+                    </div>
+
+                    <div class="settings-field">
+                        <label class="settings-label" for="settingsApiUrl">API URL</label>
+                        <input type="url" id="settingsApiUrl" class="settings-input" placeholder="https://api.example.com/v1/completions">
+                    </div>
+
+                    <div class="settings-field">
+                        <label class="settings-label" for="settingsApiToken">API Token</label>
+                        <input type="password" id="settingsApiToken" class="settings-input" placeholder="Your API token">
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="settings-section-title">Model Parameters</h3>
+                    
+                    <div class="settings-field">
+                        <label class="settings-label" for="settingsMaxTokens">Max Tokens</label>
+                        <input type="number" id="settingsMaxTokens" class="settings-input" min="1" max="4096" value="512">
+                    </div>
+
+                    <div class="settings-field">
+                        <label class="settings-label">Temperature: <span id="temperatureValue">0.7</span></label>
+                        <div class="settings-range">
+                            <input type="range" id="settingsTemperature" min="0" max="1" step="0.1" value="0.7">
+                            <span class="range-value" id="temperatureDisplay">0.7</span>
+                        </div>
+                    </div>
+
+                    <div class="settings-field">
+                        <label class="settings-label" for="settingsTimeout">Timeout (ms)</label>
+                        <input type="number" id="settingsTimeout" class="settings-input" min="1000" max="120000" value="30000">
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="settings-section-title">Change Password</h3>
+                    
+                    <div class="settings-field">
+                        <label class="settings-label" for="currentPassword">Current Password</label>
+                        <input type="password" id="currentPassword" class="settings-input" placeholder="Enter current password">
+                    </div>
+
+                    <div class="settings-field">
+                        <label class="settings-label" for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" class="settings-input" placeholder="Enter new password" minlength="6">
+                    </div>
+
+                    <div class="settings-field">
+                        <label class="settings-label" for="confirmNewPassword">Confirm New Password</label>
+                        <input type="password" id="confirmNewPassword" class="settings-input" placeholder="Confirm new password" minlength="6">
+                    </div>
+
+                    <button type="button" class="save-settings" id="changePasswordBtn">
+                        <i class="fas fa-lock"></i> Change Password
+                    </button>
+                </div>
+
+                <button type="submit" class="save-settings" id="saveSettingsBtn">
+                    <i class="fas fa-save"></i> Save Settings
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        class ChatApp {
+            constructor() {
+                this.token = localStorage.getItem('authToken');
+                this.user = null;
+                this.config = {};
+                this.userSettings = {};
+                this.conversationHistory = [];
+                this.chatSessions = [];
+                this.currentChatId = null;
+                this.isMobile = window.innerWidth <= 768;
+                this.currentView = 'signin'; // 'signin', 'signup', or 'forgot'
+                
+                this.initializeElements();
+                this.initEventListeners();
+                
+                if (this.token) {
+                    this.verifyToken();
+                } else {
+                    this.showAuth();
+                }
+            }
+
+            initializeElements() {
+                // Auth elements
+                this.authContainer = document.getElementById('authContainer');
+                this.signinForm = document.getElementById('signinForm');
+                this.signupForm = document.getElementById('signupForm');
+                this.forgotPasswordForm = document.getElementById('forgotPasswordForm');
+                this.authToggleButton = document.getElementById('authToggleButton');
+                this.authToggleText = document.getElementById('authToggleText');
+                this.forgotPasswordButton = document.getElementById('forgotPasswordButton');
+                this.forgotPasswordSection = document.getElementById('forgotPasswordSection');
+                this.authError = document.getElementById('authError');
+
+                // Main app elements
+                this.sidebar = document.getElementById('sidebar');
+                this.toggleSidebar = document.getElementById('toggleSidebar');
+                this.newChatBtn = document.getElementById('newChatBtn');
+                this.settingsBtn = document.getElementById('settingsBtn');
+                this.logoutBtn = document.getElementById('logoutBtn');
+                this.chatHistory = document.getElementById('chatHistory');
+                this.userName = document.getElementById('userName');
+                this.userAvatar = document.getElementById('userAvatar');
+
+                // Chat elements
+                this.messageInput = document.getElementById('messageInput');
+                this.sendButton = document.getElementById('sendButton');
+                this.chatMessages = document.getElementById('chatMessages');
+                this.loading = document.getElementById('loading');
+                this.welcomeScreen = document.getElementById('welcomeScreen');
+
+                // Settings elements
+                this.settingsPanel = document.getElementById('settingsPanel');
+                this.closeSettings = document.getElementById('closeSettings');
+                this.settingsForm = document.getElementById('settingsForm');
+                this.settingsError = document.getElementById('settingsError');
+                this.settingsSuccess = document.getElementById('settingsSuccess');
+                this.temperatureSlider = document.getElementById('settingsTemperature');
+                this.temperatureDisplay = document.getElementById('temperatureDisplay');
+                this.changePasswordBtn = document.getElementById('changePasswordBtn');
+            }
+
+            initEventListeners() {
+                // Auth events
+                this.signinForm.addEventListener('submit', (e) => this.handleSignin(e));
+                this.signupForm.addEventListener('submit', (e) => this.handleSignup(e));
+                this.forgotPasswordForm.addEventListener('submit', (e) => this.handleForgotPassword(e));
+                this.authToggleButton.addEventListener('click', () => this.toggleAuthView());
+                this.forgotPasswordButton.addEventListener('click', () => this.showForgotPassword());
+
+                // Main app events
+                this.toggleSidebar.addEventListener('click', () => this.toggleSidebarVisibility());
+                this.newChatBtn.addEventListener('click', () => this.startNewChat());
+                this.settingsBtn.addEventListener('click', () => this.openSettings());
+                this.logoutBtn.addEventListener('click', () => this.logout());
+
+                // Chat events
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+                this.messageInput.addEventListener('input', () => {
+                    this.autoResize();
+                    this.updateSendButton();
+                });
+
+                // Settings events
+                this.closeSettings.addEventListener('click', () => this.closeSettingsPanel());
+                this.settingsForm.addEventListener('submit', (e) => this.saveSettings(e));
+                this.temperatureSlider.addEventListener('input', (e) => {
+                    this.temperatureDisplay.textContent = e.target.value;
+                });
+                this.changePasswordBtn.addEventListener('click', () => this.changePassword());
+
+                // Mobile events
+                if (this.isMobile) {
+                    document.addEventListener('click', (e) => {
+                        if (!this.sidebar.contains(e.target) && !this.toggleSidebar.contains(e.target)) {
+                            this.sidebar.classList.remove('open');
+                        }
+                        if (!this.settingsPanel.contains(e.target) && !this.settingsBtn.contains(e.target)) {
+                            this.settingsPanel.classList.remove('open');
+                        }
+                    });
+                }
+
+                window.addEventListener('resize', () => {
+                    this.isMobile = window.innerWidth <= 768;
+                });
+            }
+
+            // Authentication methods
+            showAuth() {
+                this.authContainer.classList.remove('hidden');
+            }
+
+            hideAuth() {
+                this.authContainer.classList.add('hidden');
+            }
+
+            toggleAuthView() {
+                if (this.currentView === 'signin') {
+                    this.currentView = 'signup';
+                    this.signinForm.classList.add('hidden');
+                    this.signupForm.classList.remove('hidden');
+                    this.forgotPasswordForm.classList.add('hidden');
+                    this.authToggleText.textContent = 'Already have an account?';
+                    this.authToggleButton.textContent = 'Sign In';
+                    this.forgotPasswordSection.style.display = 'none';
+                    document.getElementById('authSubtitle').textContent = 'Create your account';
+                } else {
+                    this.currentView = 'signin';
+                    this.signupForm.classList.add('hidden');
+                    this.signinForm.classList.remove('hidden');
+                    this.forgotPasswordForm.classList.add('hidden');
+                    this.authToggleText.textContent = "Don't have an account?";
+                    this.authToggleButton.textContent = 'Sign Up';
+                    this.forgotPasswordSection.style.display = 'block';
+                    document.getElementById('authSubtitle').textContent = 'Sign in to continue';
+                }
+                this.hideAuthError();
+            }
+
+            showForgotPassword() {
+                this.currentView = 'forgot';
+                this.signinForm.classList.add('hidden');
+                this.signupForm.classList.add('hidden');
+                this.forgotPasswordForm.classList.remove('hidden');
+                this.authToggleText.textContent = 'Remember your password?';
+                this.authToggleButton.textContent = 'Sign In';
+                this.forgotPasswordSection.style.display = 'none';
+                document.getElementById('authSubtitle').textContent = 'Reset your password';
+                this.hideAuthError();
+            }
+
+            showAuthError(message) {
+                this.authError.textContent = message;
+                this.authError.classList.remove('hidden');
+            }
+
+            hideAuthError() {
+                this.authError.classList.add('hidden');
+            }
+
+            async handleSignin(e) {
+                e.preventDefault();
+                const usernameOrEmail = document.getElementById('signinUsername').value;
+                const password = document.getElementById('signinPassword').value;
+
+                try {
+                    const response = await fetch('/api/auth/signin', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ usernameOrEmail, password })
+                    });
+
+                    const data = await response.json();
+                    if (response.ok) {
+                        this.token = data.token;
+                        this.user = data.user;
+                        localStorage.setItem('authToken', this.token);
+                        await this.initializeApp();
+                    } else {
+                        this.showAuthError(data.error);
+                    }
+                } catch (error) {
+                    this.showAuthError('Connection error. Please try again.');
+                }
+            }
+
+            async handleSignup(e) {
+                e.preventDefault();
+                const username = document.getElementById('signupUsername').value;
+                const email = document.getElementById('signupEmail').value;
+                const password = document.getElementById('signupPassword').value;
+                const passwordConfirm = document.getElementById('signupPasswordConfirm').value;
+
+                if (password !== passwordConfirm) {
+                    this.showAuthError('Passwords do not match');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/auth/signup', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, email, password })
+                    });
+
+                    const data = await response.json();
+                    if (response.ok) {
+                        this.token = data.token;
+                        this.user = data.user;
+                        localStorage.setItem('authToken', this.token);
+                        await this.initializeApp();
+                    } else {
+                        this.showAuthError(data.error);
+                    }
+                } catch (error) {
+                    this.showAuthError('Connection error. Please try again.');
+                }
+            }
+
+            async handleForgotPassword(e) {
+                e.preventDefault();
+                const usernameOrEmail = document.getElementById('forgotUsernameOrEmail').value;
+
+                try {
+                    const response = await fetch('/api/auth/forgot-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ usernameOrEmail })
+                    });
+
+                    const data = await response.json();
+                    if (response.ok) {
+                        this.showAuthError(`Password reset successful. ${data.tempPassword ? 'Temporary password: ' + data.tempPassword : 'Check your console for the temporary password.'}`);
+                    } else {
+                        this.showAuthError(data.error);
+                    }
+                } catch (error) {
+                    this.showAuthError('Connection error. Please try again.');
+                }
+            }
+
+            async verifyToken() {
+                try {
+                    const response = await fetch('/api/auth/verify', {
+                        method: 'POST',
+                        headers: { 
+                            'Authorization': `Bearer ${this.token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.user = data.user;
+                        await this.initializeApp();
+                    } else {
+                        localStorage.removeItem('authToken');
+                        this.token = null;
+                        this.showAuth();
+                    }
+                } catch (error) {
+                    localStorage.removeItem('authToken');
+                    this.token = null;
+                    this.showAuth();
+                }
+            }
+
+            logout() {
+                localStorage.removeItem('authToken');
+                this.token = null;
+                this.user = null;
+                this.showAuth();
+                this.settingsPanel.classList.remove('open');
+            }
+
+            // Application initialization
+            async initializeApp() {
+                this.hideAuth();
+                await this.loadConfig();
+                await this.loadUserSettings();
+                this.updateUserInfo();
+                // Add a small delay to ensure DOM is ready
+                setTimeout(() => {
+                    this.startNewChat();
+                }, 100);
+            }
+
+            updateUserInfo() {
+                if (this.user) {
+                    this.userName.textContent = this.user.username;
+                    this.userAvatar.textContent = this.user.username.charAt(0).toUpperCase();
+                }
+            }
+
+            // API methods with authentication
+            async apiCall(endpoint, options = {}) {
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`,
+                    ...options.headers
+                };
+
+                return fetch(endpoint, { ...options, headers });
+            }
+
+            async loadConfig() {
+                try {
+                    const response = await fetch('/api/config');
+                    this.config = await response.json();
+                    this.applyConfig();
+                } catch (error) {
+                    console.error('Failed to load config:', error);
+                }
+            }
+
+            applyConfig() {
+                document.getElementById('pageTitle').textContent = this.config.appTitle;
+                document.title = this.config.appTitle;
+                document.getElementById('appTitle').textContent = this.config.appTitle;
+                document.getElementById('appSubtitle').textContent = this.config.appSubtitle;
+                document.getElementById('welcomeTitle').textContent = this.config.appTitle;
+                document.getElementById('welcomeSubtitle').textContent = this.config.appSubtitle;
+                document.getElementById('authTitle').textContent = this.config.appTitle;
+                this.messageInput.placeholder = this.config.inputPlaceholder;
+                document.getElementById('loadingMessage').textContent = this.config.loadingMessage;
+                document.getElementById('loadingAvatar').textContent = this.config.chatAssistantName;
+
+                // Update logos to use local logo.png
+                const logos = [document.getElementById('appLogo'), document.getElementById('welcomeLogo'), document.getElementById('authLogo')];
+                logos.forEach(logo => {
+                    if (logo) {
+                        const img = document.createElement('img');
+                        img.src = '/images/logo.png';
+                        img.alt = 'Logo';
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.borderRadius = 'inherit';
+                        img.style.objectFit = 'cover';
+                        img.onerror = function() {
+                            console.error('Failed to load logo:', this.src);
+                            // Fallback to robot icon
+                            logo.innerHTML = '<i class="fas fa-robot"></i>';
+                        };
+                        logo.innerHTML = '';
+                        logo.appendChild(img);
+                    }
+                });
+            }
+
+            async loadUserSettings() {
+                try {
+                    const response = await this.apiCall('/api/user/settings');
+                    if (response.ok) {
+                        this.userSettings = await response.json();
+                        this.populateSettingsForm();
+                        document.getElementById('modelName').textContent = this.userSettings.modelName;
+                    }
+                } catch (error) {
+                    console.error('Failed to load user settings:', error);
+                }
+            }
+
+            populateSettingsForm() {
+                document.getElementById('settingsModelName').value = this.userSettings.modelName || '';
+                document.getElementById('settingsApiUrl').value = this.userSettings.apiUrl || '';
+                document.getElementById('settingsApiToken').value = this.userSettings.apiToken || '';
+                document.getElementById('settingsMaxTokens').value = this.userSettings.maxTokens || 512;
+                document.getElementById('settingsTemperature').value = this.userSettings.temperature || 0.7;
+                document.getElementById('settingsTimeout').value = this.userSettings.timeout || 30000;
+                this.temperatureDisplay.textContent = this.userSettings.temperature || 0.7;
+            }
+
+            // Settings methods
+            openSettings() {
+                this.settingsPanel.classList.add('open');
+                this.newChatBtn.classList.remove('active');
+                this.settingsBtn.classList.add('active');
+            }
+
+            closeSettingsPanel() {
+                this.settingsPanel.classList.remove('open');
+                this.settingsBtn.classList.remove('active');
+                this.newChatBtn.classList.add('active');
+            }
+
+            async saveSettings(e) {
+                e.preventDefault();
+                
+                const settings = {
+                    modelName: document.getElementById('settingsModelName').value,
+                    apiUrl: document.getElementById('settingsApiUrl').value,
+                    apiToken: document.getElementById('settingsApiToken').value,
+                    maxTokens: parseInt(document.getElementById('settingsMaxTokens').value),
+                    temperature: parseFloat(document.getElementById('settingsTemperature').value),
+                    timeout: parseInt(document.getElementById('settingsTimeout').value)
+                };
+
+                try {
+                    const response = await this.apiCall('/api/user/settings', {
+                        method: 'PUT',
+                        body: JSON.stringify(settings)
+                    });
+
+                    if (response.ok) {
+                        this.userSettings = settings;
+                        document.getElementById('modelName').textContent = settings.modelName;
+                        this.showSettingsSuccess('Settings saved successfully!');
+                        setTimeout(() => this.hideSettingsSuccess(), 3000);
+                    } else {
+                        const data = await response.json();
+                        this.showSettingsError(data.error);
+                    }
+                } catch (error) {
+                    this.showSettingsError('Failed to save settings. Please try again.');
+                }
+            }
+
+            showSettingsError(message) {
+                this.settingsError.textContent = message;
+                this.settingsError.classList.remove('hidden');
+            }
+
+            hideSettingsError() {
+                this.settingsError.classList.add('hidden');
+            }
+
+            showSettingsSuccess(message) {
+                this.settingsSuccess.textContent = message;
+                this.settingsSuccess.classList.remove('hidden');
+            }
+
+            hideSettingsSuccess() {
+                this.settingsSuccess.classList.add('hidden');
+            }
+
+            async changePassword() {
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+                if (!currentPassword || !newPassword || !confirmNewPassword) {
+                    this.showSettingsError('All password fields are required');
+                    return;
+                }
+
+                if (newPassword !== confirmNewPassword) {
+                    this.showSettingsError('New passwords do not match');
+                    return;
+                }
+
+                if (newPassword.length < 6) {
+                    this.showSettingsError('New password must be at least 6 characters long');
+                    return;
+                }
+
+                try {
+                    const response = await this.apiCall('/api/auth/change-password', {
+                        method: 'POST',
+                        body: JSON.stringify({ currentPassword, newPassword })
+                    });
+
+                    if (response.ok) {
+                        this.showSettingsSuccess('Password changed successfully!');
+                        document.getElementById('currentPassword').value = '';
+                        document.getElementById('newPassword').value = '';
+                        document.getElementById('confirmNewPassword').value = '';
+                        setTimeout(() => this.hideSettingsSuccess(), 3000);
+                    } else {
+                        const data = await response.json();
+                        this.showSettingsError(data.error);
+                    }
+                } catch (error) {
+                    this.showSettingsError('Failed to change password. Please try again.');
+                }
+            }
+
+            // Chat methods (updated for authentication)
+            toggleSidebarVisibility() {
+                if (this.isMobile) {
+                    this.sidebar.classList.toggle('open');
+                } else {
+                    this.sidebar.classList.toggle('collapsed');
+                }
+            }
+
+            startNewChat() {
+                this.currentChatId = Date.now().toString();
+                this.conversationHistory = [];
+                this.chatMessages.innerHTML = '';
+                this.welcomeScreen.style.display = 'flex';
+                this.addMessage('assistant', this.config.welcomeMessage);
+                
+                // Ensure welcome logo is loaded
+                this.loadWelcomeLogo();
+                
+                this.closeSettingsPanel();
+                if (this.isMobile) {
+                    this.sidebar.classList.remove('open');
+                }
+            }
+
+            loadWelcomeLogo() {
+                // Add a small delay to ensure the welcome screen is visible
+                setTimeout(() => {
+                    const welcomeLogo = document.getElementById('welcomeLogo');
+                    if (welcomeLogo) {
+                        console.log('Loading welcome logo...');
+                        const img = document.createElement('img');
+                        img.src = '/images/logo.png?t=' + Date.now(); // Cache busting
+                        img.alt = 'Logo';
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.borderRadius = 'inherit';
+                        img.style.objectFit = 'cover';
+                        img.onload = function() {
+                            console.log('Welcome logo loaded successfully');
+                        };
+                        img.onerror = function() {
+                            console.error('Failed to load welcome logo:', this.src);
+                            // Fallback to robot icon
+                            welcomeLogo.innerHTML = '<i class="fas fa-robot"></i>';
+                        };
+                        welcomeLogo.innerHTML = '';
+                        welcomeLogo.appendChild(img);
+                    } else {
+                        console.error('Welcome logo element not found');
+                    }
+                }, 50);
+            }
+
+            autoResize() {
+                this.messageInput.style.height = 'auto';
+                this.messageInput.style.height = Math.min(this.messageInput.scrollHeight, 200) + 'px';
+            }
+
+            updateSendButton() {
+                const hasText = this.messageInput.value.trim().length > 0;
+                this.sendButton.disabled = !hasText;
+            }
+
+            async sendMessage() {
+                const message = this.messageInput.value.trim();
+                if (!message) return;
+
+                if (this.welcomeScreen.style.display !== 'none') {
+                    this.welcomeScreen.style.display = 'none';
+                }
+
+                this.addMessage('user', message);
+                this.messageInput.value = '';
+                this.autoResize();
+                this.updateSendButton();
+                this.setLoading(true);
+
+                try {
+                    const response = await this.apiCall('/api/chat', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            message: message,
+                            history: this.conversationHistory,
+                            sessionId: this.currentChatId
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.addMessage('assistant', data.response);
+                        
+                        this.conversationHistory.push(
+                            { role: 'user', content: message },
+                            { role: 'assistant', content: data.response }
+                        );
+
+                        const maxHistory = this.config.maxConversationHistory || 30;
+                        if (this.conversationHistory.length > maxHistory) {
+                            this.conversationHistory = this.conversationHistory.slice(-maxHistory);
+                        }
+                    } else {
+                        const errorData = await response.json();
+                        if (response.status === 401 || response.status === 403) {
+                            this.logout();
+                            return;
+                        }
+                        this.showError(`Error: ${errorData.error}`);
+                    }
+                } catch (error) {
+                    this.showError(`Error: ${error.message}`);
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            addMessage(role, content) {
+                const messageContainer = document.createElement('div');
+                messageContainer.className = `message-container ${role}`;
+                
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-content';
+                
+                const avatar = document.createElement('div');
+                avatar.className = `message-avatar ${role}`;
+                avatar.textContent = role === 'user' ? 
+                    (this.user ? this.user.username : 'You') : 
+                    (this.config.chatAssistantName || 'ChatterMouse');
+                
+                const messageText = document.createElement('div');
+                messageText.className = 'message-text';
+                messageText.textContent = content;
+                
+                messageContent.appendChild(avatar);
+                messageContent.appendChild(messageText);
+                messageContainer.appendChild(messageContent);
+                
+                this.chatMessages.appendChild(messageContainer);
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+
+            showError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+                this.chatMessages.appendChild(errorDiv);
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+
+            setLoading(isLoading) {
+                this.loading.style.display = isLoading ? 'block' : 'none';
+                this.sendButton.disabled = isLoading || !this.messageInput.value.trim();
+                this.messageInput.disabled = isLoading;
+                
+                if (isLoading) {
+                    this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new ChatApp();
+        });
+    </script>
+</body>
+</html>

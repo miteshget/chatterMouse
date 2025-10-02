@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1759318507649,
+    "username": "mitesh",
+    "email": "miteshget@gmail.com",
+    "password_hash": "$2a$10$A7iKmM.n1/LB1gsq11gpWON3A9/9VyR0bWs1tISZPTNZA1nf7uQ5m",
+    "created_at": "2025-10-01T11:35:07.649Z"
+  },
+  {
+    "id": 1759370361920,
+    "username": "admin",
+    "email": "admin@chattermouse.local",
+    "password_hash": "$2a$10$zwBqJyX6z2ufEhWloNQuG.2XIX2eowc3ypeqHGoyu4YS.BlxLmrtm",
+    "is_admin": true,
+    "created_at": "2025-10-02T01:59:21.920Z"
+  }
+]
